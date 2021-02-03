@@ -1,10 +1,5 @@
-import { useQuery, useMutation, useSubscription } from "@apollo/react-hooks";
-import React, { useState } from "react";
-import {
-  addMessageMutation,
-  messageAddedSubscription,
-  messagesQuery,
-} from "./graphql/queries";
+import React from "react";
+import { useChatMessages } from "./hooks";
 import MessageInput from "./MessageInput";
 import MessageList from "./MessageList";
 
@@ -18,24 +13,17 @@ const Chat = ({ user }) => {
 
   // Typically use loading and error that comes back from useQuery to render states for the user
   // const { loading, error, data } = useQuery(messagesQuery);
-  const [messages, setMessages] = useState([]);
-  useQuery(messagesQuery, {
-    onCompleted: ({ messages }) => setMessages(messages),
-  });
-  useSubscription(messageAddedSubscription, {
-    onSubscriptionData: ({ subscriptionData }) => {
-      setMessages(messages.concat(subscriptionData.data.messageAdded));
-    },
-  });
+  // const [messages, setMessages] = useState([]);
+  // useQuery(messagesQuery, {
+  //   onCompleted: ({ messages }) => setMessages(messages),
+  // });
 
   // Returns a function that lets us trigger mutation function later
   // Can also return a second result { loading, error, data, called } if interested in rendering different states based on mutation state
-  const [addMessage] = useMutation(addMessageMutation);
+  // const [addMessage] = useMutation(addMessageMutation);
   // const messages = data ? data.messages : [];
 
-  const handleSend = async (text) => {
-    await addMessage({ variables: { input: { text } } });
-  };
+  const { messages, addMessage } = useChatMessages();
 
   // Handle loading and error states to user
   // if (loading) return <Spinner />;
@@ -46,7 +34,7 @@ const Chat = ({ user }) => {
       <div className="container">
         <h1 className="title">Chatting as {user}</h1>
         <MessageList user={user} messages={messages} />
-        <MessageInput onSend={handleSend} />
+        <MessageInput onSend={addMessage} />
       </div>
     </section>
   );
