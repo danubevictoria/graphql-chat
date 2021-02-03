@@ -1,34 +1,55 @@
-import React, { Component } from 'react';
-import { addMessage, getMessages } from './graphql/queries';
-import MessageInput from './MessageInput';
-import MessageList from './MessageList';
+import { useQuery, useMutation, useSubscription } from "@apollo/react-hooks";
+import React, { useState } from "react";
+import {
+  addMessageMutation,
+  messageAddedSubscription,
+  messagesQuery,
+} from "./graphql/queries";
+import MessageInput from "./MessageInput";
+import MessageList from "./MessageList";
 
-class Chat extends Component {
-  state = {messages: []};
+const Chat = ({ user }) => {
+  // component will be rendered twice when the data is available
+  // const result = useQuery(messagesQuery);
 
-  async componentDidMount() {
-    const messages = await getMessages();
-    this.setState({messages});
-  }
+  // this is what useQuery does
+  // const [result, setResult] = useState({loading: true});
+  // client.query({query: messagesQuery}).then(({data}) => setResult({loading: false, data}))
 
-  async handleSend(text) {
-    const message = await addMessage(text);
-    this.setState({messages: this.state.messages.concat(message)});
-  }
+  // Typically use loading and error that comes back from useQuery to render states for the user
+  // const { loading, error, data } = useQuery(messagesQuery);
+  const [messages, setMessages] = useState([]);
+  useQuery(messagesQuery, {
+    onCompleted: ({ messages }) => setMessages(messages),
+  });
+  useSubscription(messageAddedSubscription, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      setMessages(messages.concat(subscriptionData.data.messageAdded));
+    },
+  });
 
-  render() {
-    const {user} = this.props;
-    const {messages} = this.state;
-    return (
-      <section className="section">
-        <div className="container">
-          <h1 className="title">Chatting as {user}</h1>
-          <MessageList user={user} messages={messages} />
-          <MessageInput onSend={this.handleSend.bind(this)} />
-        </div>
-      </section>
-    );
-  }  
-}
+  // Returns a function that lets us trigger mutation function later
+  // Can also return a second result { loading, error, data, called } if interested in rendering different states based on mutation state
+  const [addMessage] = useMutation(addMessageMutation);
+  // const messages = data ? data.messages : [];
+
+  const handleSend = async (text) => {
+    await addMessage({ variables: { input: { text } } });
+  };
+
+  // Handle loading and error states to user
+  // if (loading) return <Spinner />;
+  // if (error) return <div>Error!</div>;
+
+  return (
+    <section className="section">
+      <div className="container">
+        <h1 className="title">Chatting as {user}</h1>
+        <MessageList user={user} messages={messages} />
+        <MessageInput onSend={handleSend} />
+      </div>
+    </section>
+  );
+};
 
 export default Chat;
