@@ -8,5 +8,15 @@
     "id": "HyRPE6weO",
     "from": "alice",
     "text": "hi"
+  },
+  {
+    "id": "rkrKwawgd",
+    "from": "alice",
+    "text": "how r u"
+  },
+  {
+    "id": "HJlhv6vxd",
+    "from": "bob",
+    "text": "good and u"
   }
 ]
