@@ -3,5 +3,10 @@
     "id": "SJKhIAKYB",
     "from": "system",
     "text": "Welcome!"
+  },
+  {
+    "id": "HyRPE6weO",
+    "from": "alice",
+    "text": "hi"
   }
 ]
